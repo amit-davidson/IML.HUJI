@@ -1,12 +1,14 @@
 from __future__ import annotations
+
 import numpy as np
-from numpy.linalg import inv, det, slogdet
+from numpy.linalg import det, inv
 
 
 class UnivariateGaussian:
     """
     Class for univariate Gaussian Distribution Estimator
     """
+
     def __init__(self, biased_var: bool = False) -> UnivariateGaussian:
         """
         Estimator for univariate Gaussian mean and variance parameters
@@ -51,7 +53,13 @@ class UnivariateGaussian:
         Sets `self.mu_`, `self.var_` attributes according to calculated estimation (where
         estimator is either biased or unbiased). Then sets `self.fitted_` attribute to `True`
         """
-        raise NotImplementedError()
+        self.mu_ = np.ndarray.sum(X) / len(X)
+
+        sum_ = np.ndarray.sum((X - self.mu_) ** 2)
+        if self.biased_:
+            self.var_ = (1 / len(X)) * sum_
+        else:
+            self.var_ = (1 / (len(X) - 1)) * sum_
 
         self.fitted_ = True
         return self
@@ -75,8 +83,10 @@ class UnivariateGaussian:
         ValueError: In case function was called prior fitting the model
         """
         if not self.fitted_:
-            raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        raise NotImplementedError()
+            raise ValueError(
+                "Estimator must first be fitted before calling `pdf` function")
+        return (1 / np.sqrt(2 * np.pi * self.var_)) * np.exp(
+            -(X - self.mu_) ** 2 / (2 * self.var_))
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
@@ -97,13 +107,15 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        raise NotImplementedError()
+        return -0.5 * len(X) * np.log((2 * np.pi * sigma)) - \
+               np.ndarray.sum((X - mu) ** 2) / (2 * sigma)
 
 
 class MultivariateGaussian:
     """
     Class for multivariate Gaussian Distribution Estimator
     """
+
     def __init__(self):
         """
         Initialize an instance of multivariate Gaussian estimator
@@ -143,7 +155,8 @@ class MultivariateGaussian:
         Sets `self.mu_`, `self.cov_` attributes according to calculated estimation.
         Then sets `self.fitted_` attribute to `True`
         """
-        raise NotImplementedError()
+        self.mu_ = np.sum(X, axis=0) / len(X)
+        self.cov_ = (X - self.mu_).T @ (X - self.mu_) / (len(X) - 1)
 
         self.fitted_ = True
         return self
@@ -167,11 +180,23 @@ class MultivariateGaussian:
         ValueError: In case function was called prior fitting the model
         """
         if not self.fitted_:
-            raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        raise NotImplementedError()
+            raise ValueError(
+                "Estimator must first be fitted before calling `pdf` function")
+
+        d = X - self.mu_
+        d **= 2
+        # mahalanobis = np.dot(d, 1/np.diag(self.cov_))
+        # mahalanobis = np.dot(d, inv(self.cov_))
+        b = np.exp(-0.5 * np.dot(np.dot(d, inv(self.cov_)), d.T))
+
+        a = b / (np.power(2 * np.pi, len(X) / 2.) * np.sqrt(det(self.cov_)))
+
+        # mahalanobis = ((X - self.mu_) @ inv(self.cov_) @ (X - self.mu_).T)
+        return a
 
     @staticmethod
-    def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
+    def log_likelihood(mu: np.ndarray, cov: np.ndarray,
+                       X: np.ndarray) -> float:
         """
         Calculate the log-likelihood of the data under a specified Gaussian model
 
@@ -189,4 +214,10 @@ class MultivariateGaussian:
         log_likelihood: float
             log-likelihood calculated over all input data and under given parameters of Gaussian
         """
-        raise NotImplementedError()
+        d = X - mu
+        d **= 2
+        mahalanobis = np.dot(d, 1/np.diag(cov))
+
+        return -0.5 * len(X) * np.log(
+            (2 * np.pi) ** cov.shape[0]) - 0.5 * len(X) * np.log(
+            det(cov)) - -0.5 * np.sum(mahalanobis)
