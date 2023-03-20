@@ -37,7 +37,7 @@ max_diff = 0.001
 mu = 5; std = 2
 fitted = ge.UnivariateGaussian(biased_var=False).fit(np.random.normal(loc=mu, scale=std, size=10000000))
 x = mu + np.random.rand(1000)
-expected = multivariate_normal.pdf(x, mean=mu, cov=std ** 2);
+expected = multivariate_normal.pdf(x, mean=mu, cov=std ** 2)
 our = fitted.pdf(x)
 print(f"expected: {expected[:5]}")
 print(f"our:      {our[:5]}\n")
