@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
-from numpy.linalg import det, inv
+from numpy.linalg import det, inv, slogdet
 
 
 class UnivariateGaussian:
@@ -184,15 +184,8 @@ class MultivariateGaussian:
                 "Estimator must first be fitted before calling `pdf` function")
 
         d = X - self.mu_
-        d **= 2
-        # mahalanobis = np.dot(d, 1/np.diag(self.cov_))
-        # mahalanobis = np.dot(d, inv(self.cov_))
-        b = np.exp(-0.5 * np.dot(np.dot(d, inv(self.cov_)), d.T))
-
-        a = b / (np.power(2 * np.pi, len(X) / 2.) * np.sqrt(det(self.cov_)))
-
-        # mahalanobis = ((X - self.mu_) @ inv(self.cov_) @ (X - self.mu_).T)
-        return a
+        mahalanobis = (d @ inv(self.cov_) * d).sum(-1)
+        return np.exp(- mahalanobis / 2) / np.sqrt(np.power(2 * np.pi, len(X[0])) * det(self.cov_))
 
     @staticmethod
     def log_likelihood(mu: np.ndarray, cov: np.ndarray,
@@ -214,10 +207,7 @@ class MultivariateGaussian:
         log_likelihood: float
             log-likelihood calculated over all input data and under given parameters of Gaussian
         """
-        d = X - mu
-        d **= 2
-        mahalanobis = np.dot(d, 1/np.diag(cov))
-
-        return -0.5 * len(X) * np.log(
-            (2 * np.pi) ** cov.shape[0]) - 0.5 * len(X) * np.log(
-            det(cov)) - -0.5 * np.sum(mahalanobis)
+        m = X.shape[0]
+        d = X.shape[1]
+        mahalanobis = (X - mu) @ inv(cov) * (X - mu)
+        return (-m/2) * slogdet(cov)[1] - (m*d/2)*np.log(2*np.pi) - 0.5*np.sum(mahalanobis)
