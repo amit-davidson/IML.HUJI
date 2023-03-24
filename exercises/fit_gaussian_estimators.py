@@ -65,7 +65,8 @@ def test_multivariate_gaussian():
 
     fig = px.imshow(res, x=f3, y=f1)
     fig.update_layout(
-        title="Log-Likelihood Multivatiate Gaussian As Function of Numbers between 0-10",
+        title="Log-Likelihood Multivatiate Gaussian As Function of Features f1"
+              " and f3",
         xaxis_title="f3",
         yaxis_title="f1",
         title_x=0.5
