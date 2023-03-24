@@ -30,12 +30,12 @@ def test_univariate_gaussian():
     y_axis = model.pdf(dist)
     fig = px.scatter(x=dist, y=y_axis)
     fig.update_layout(
-        title="PDF of our model",
+        title="PDF of a Univariate Distribution",
         xaxis_title="Sample Value",
         yaxis_title="Sample Result",
         title_x=0.5
     )
-    fig.write_image("UnivatiateModelPDF.png")
+    fig.write_image("UnivariateModelPDF.png")
 
 
 def test_multivariate_gaussian():

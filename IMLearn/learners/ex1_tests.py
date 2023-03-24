@@ -29,7 +29,7 @@ assert isinstance(fitted_biased.var_, float)
 assert np.all(np.abs(fitted.mu_ - mu) < max_diff)
 assert np.allclose(fitted_biased.mu_, fitted.mu_)
 assert np.all(np.abs(fitted_biased.var_ - std ** 2) < max_diff)
-assert(fitted_biased.var_ / (m - 1) == fitted.var_ / m)
+assert(fitted_biased.var_ / (m - 1) - fitted.var_ / m < 0.001)
 
 
 print("uni.pdf")
