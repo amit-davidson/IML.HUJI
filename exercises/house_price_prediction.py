@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
+
 pio.templates.default = "simple_white"
 
 
@@ -26,7 +27,8 @@ def load_data(filename: str):
     raise NotImplementedError()
 
 
-def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
+def feature_evaluation(X: pd.DataFrame, y: pd.Series,
+                       output_path: str = ".") -> NoReturn:
     """
     Create scatter plot between each feature and the response.
         - Plot title specifies feature name
@@ -49,7 +51,10 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of housing prices dataset
-    raise NotImplementedError()
+    f = pd.read_csv(
+        "/Users/amitdavidson/PycharmProjects/IML.HUJI/datasets/house_prices.csv")
+    f = f.drop(columns=["id"])
+    print(f)
 
     # Question 2 - Feature evaluation with respect to response
     raise NotImplementedError()
