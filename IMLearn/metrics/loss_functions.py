@@ -17,10 +17,11 @@ def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     MSE of given predictions
     """
-    return numpy.ndarray.mean(y_true-y_pred, axis=0)
+    return numpy.ndarray.mean(y_true - y_pred, axis=0)
 
 
-def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: bool = True) -> float:
+def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray,
+                            normalize: bool = True) -> float:
     """
     Calculate misclassification loss
 
@@ -90,5 +91,3 @@ def softmax(X: np.ndarray) -> np.ndarray:
         Softmax(x) for every sample x in given data X
     """
     raise NotImplementedError()
-
-house_price_prediction(np.ndarray())
