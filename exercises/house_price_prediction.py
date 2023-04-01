@@ -61,8 +61,7 @@ def load_data(filename: str):
 
     # Processing
     X, y = preprocess_data(X, y)
-    train_X, _, train_y, _ = split_train_test(X, y)
-    return train_X, train_y
+    return X, y
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series,
@@ -106,7 +105,7 @@ if __name__ == '__main__':
     # Question 2 - Feature evaluation with respect to response
     feature_evaluation(X, y)
     # Question 3 - Split samples into training- and testing sets.
-    raise NotImplementedError()
+    train_X, train_y, test_X, test_y = split_train_test(X, y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -115,4 +114,8 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    raise NotImplementedError()
+    for p in range(10, 100):
+        train_X.sample(frac=p)
+        l = LinearRegression()
+        l.fit(train_X, train_y.loc[train_X.index])
+        l.loss(test_X, test_y)
