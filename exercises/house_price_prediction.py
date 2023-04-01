@@ -79,11 +79,10 @@ if __name__ == '__main__':
 
     y = df["price"]
     X = df.drop(columns=["price"])
-    train_X, train_y, test_X, test_y = split_train_test(X, y)
-
 
     # Question 2 - Preprocessing of housing prices dataset
     X, y = preprocess_data(X, y)
+    train_X, train_y, test_X, test_y = split_train_test(X, y)
 
     # Question 3 - Feature evaluation with respect to response
     feature_evaluation(X, y)
@@ -95,8 +94,13 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    for p in range(10, 100):
-        train_X.sample(frac=p)
-        l = LinearRegression()
-        l.fit(train_X, train_y.loc[train_X.index])
-        l.loss(test_X, test_y)
+    res = np.zeros((91, 10))
+    test_x_arr = test_X.to_numpy()
+    test_y_arr = test_y.to_numpy()
+    for p in range(10, 101):
+        for i in range(10):
+            sp = train_X.sample(frac=p / 100)
+            l = LinearRegression(include_intercept=True)
+            l.fit(sp, train_y.loc[sp.index])
+            res[p - 10, i] = l.loss(test_x_arr, test_y_arr)
+    print(res)
