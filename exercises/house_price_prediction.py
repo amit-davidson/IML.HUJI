@@ -29,8 +29,13 @@ def preprocess_data(X: pd.DataFrame, y: pd.Series) -> Tuple[
     Nothing as the method mutates the data in-place
     """
 
-    X = X.drop(columns=["id"])
-    X = X.drop(columns=["date"])
+    X = X.drop(columns=["id", "date"])
+    X["zipcode"] = X["zipcode"].astype(int)
+    X = X[X["sqft_living"] > 0]
+
+    for column in ["bathrooms", "floors", "bedrooms"]:
+        X = X[X[column] >= 0]
+
     return X, y
 
 
@@ -49,6 +54,8 @@ def load_data(filename: str):
     """
     # Load data
     df = pd.read_csv(filename, delimiter=",").dropna().drop_duplicates()
+    df = df[df["price"] > 0]
+
     y = df["price"]
     X = df.drop(columns=["price"])
 
