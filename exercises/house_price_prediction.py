@@ -79,13 +79,14 @@ if __name__ == '__main__':
 
     y = df["price"]
     X = df.drop(columns=["price"])
+    train_X, train_y, test_X, test_y = split_train_test(X, y)
 
-    X, y = preprocess_data(X, y)
 
     # Question 2 - Preprocessing of housing prices dataset
-    feature_evaluation(X, y)
+    X, y = preprocess_data(X, y)
+
     # Question 3 - Feature evaluation with respect to response
-    train_X, train_y, test_X, test_y = split_train_test(X, y)
+    feature_evaluation(X, y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
