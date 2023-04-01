@@ -1,7 +1,7 @@
 from IMLearn.utils import split_train_test
 from IMLearn.learners.regressors import LinearRegression
 
-from typing import NoReturn
+from typing import NoReturn, Tuple
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -9,6 +9,29 @@ import plotly.express as px
 import plotly.io as pio
 
 pio.templates.default = "simple_white"
+
+
+def get_pearson_correlation(x: np.ndarray, y: np.ndarray) -> float:
+    return np.cov(x, y)[1, 0] / (np.std(x) * np.std(y))
+
+
+def preprocess_data(X: pd.DataFrame, y: pd.Series) -> Tuple[
+    pd.DataFrame, pd.Series]:
+    """
+    Load house prices dataset and preprocess data.
+    Parameters
+    ----------
+    filename: str
+        Path to house prices dataset
+
+    Returns
+    -------
+    Nothing as the method mutates the data in-place
+    """
+
+    X = X.drop(columns=["id"])
+    X = X.drop(columns=["date"])
+    return X, y
 
 
 def load_data(filename: str):
@@ -24,7 +47,15 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    raise NotImplementedError()
+    # Load data
+    df = pd.read_csv(filename, delimiter=",").dropna().drop_duplicates()
+    y = df["price"]
+    X = df.drop(columns=["price"])
+
+    # Processing
+    X, y = preprocess_data(X, y)
+    train_X, _, train_y, _ = split_train_test(X, y)
+    return train_X, train_y
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series,
@@ -45,20 +76,28 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series,
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    raise NotImplementedError()
+    y_arr = y.to_numpy()
+
+    for column in X:
+        x_arr = X[column].to_numpy()
+        corr = get_pearson_correlation(x_arr, y_arr)
+        fig = px.scatter(x=X[column], y=y)
+        fig.update_layout(
+            title=f"Correlation between {column} and Price<br>Pearson Correlation:{corr}",
+            xaxis_title=column,
+            yaxis_title="Price",
+            title_x=0.5
+        )
+        fig.write_image(f"CorrelationBetween{column}AndPrice.png")
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of housing prices dataset
-    f = pd.read_csv(
+    X, y = load_data(
         "/Users/amitdavidson/PycharmProjects/IML.HUJI/datasets/house_prices.csv")
-    f = f.drop(columns=["id"])
-    print(f)
-
     # Question 2 - Feature evaluation with respect to response
-    raise NotImplementedError()
-
+    feature_evaluation(X, y)
     # Question 3 - Split samples into training- and testing sets.
     raise NotImplementedError()
 
