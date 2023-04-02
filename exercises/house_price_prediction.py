@@ -97,10 +97,22 @@ if __name__ == '__main__':
     res = np.zeros((91, 10))
     test_x_arr = test_X.to_numpy()
     test_y_arr = test_y.to_numpy()
-    for p in range(10, 101):
+    p_range = list(range(10, 101))
+    for p in p_range:
         for i in range(10):
             sp = train_X.sample(frac=p / 100)
             l = LinearRegression(include_intercept=True)
             l.fit(sp, train_y.loc[sp.index])
             res[p - 10, i] = l.loss(test_x_arr, test_y_arr)
+
+    loss_values = np.mean(res, axis=1)
     print(res)
+    fig = px.scatter(x=p_range, y=loss_values)
+    fig.update_layout(
+        title=f"Loss values as a function of test percentage",
+        xaxis_title="Loss value",
+        yaxis_title="Test percentage",
+        title_x=0.5
+    )
+    fig.write_image(f"LossValuesAsAFunctionOfTestPercentage.png")
+
