@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
+import plotly.graph_objects as go
 
 pio.templates.default = "simple_white"
 
@@ -28,7 +29,7 @@ def preprocess_data(X: pd.DataFrame, y: Optional[pd.Series] = None):
     DataFrame or a Tuple[DataFrame, Series]
     """
     X = X.drop(columns=["id", "date"])
-    X["zipcode"] = X["zipcode"].astype(int)
+    X = pd.get_dummies(X, prefix="zipcode", columns=["zipcode"])
     X = X[X["sqft_living"] > 0]
 
     for column in ["bathrooms", "floors", "bedrooms"]:
@@ -58,6 +59,8 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series,
     y_arr = y.to_numpy()
 
     for column in X:
+        if column.startswith("zipcode"):
+            continue
         x_arr = X[column].to_numpy()
         corr = get_pearson_correlation(x_arr, y_arr)
         fig = px.scatter(x=X[column], y=y)
@@ -104,15 +107,24 @@ if __name__ == '__main__':
             l = LinearRegression(include_intercept=True)
             l.fit(sp, train_y.loc[sp.index])
             res[p - 10, i] = l.loss(test_x_arr, test_y_arr)
-
     loss_values = np.mean(res, axis=1)
-    print(res)
-    fig = px.scatter(x=p_range, y=loss_values)
-    fig.update_layout(
-        title=f"Loss values as a function of test percentage",
-        xaxis_title="Loss value",
-        yaxis_title="Test percentage",
-        title_x=0.5
-    )
-    fig.write_image(f"LossValuesAsAFunctionOfTestPercentage.png")
+    std_values = np.std(res, axis=1)
 
+    scatter = [
+        go.Scatter(x=p_range, y=loss_values, mode="markers+lines",
+                   name="Mean loss", showlegend=False),
+        go.Scatter(x=p_range, y=loss_values + 2 * std_values, mode="lines",
+                   name="Mean loss", fill="tonexty",
+                   line=dict(color="lightgrey"), showlegend=False),
+        go.Scatter(x=p_range, y=loss_values - 2 * std_values, mode="lines",
+                   name="Mean loss", fill="tonexty",
+                   line=dict(color="lightgrey"), showlegend=False),
+    ]
+    layout = go.Layout(
+        title={"text": "Loss values as a function of test percentage",
+               "x": 0.5},
+        xaxis={"title": "Loss value"},
+        yaxis={"title": "Test percentage"},
+    )
+    fig = go.Figure(data=scatter, layout=layout)
+    fig.write_image(f"LossValuesAsAFunctionOfTestPercentage.png")
