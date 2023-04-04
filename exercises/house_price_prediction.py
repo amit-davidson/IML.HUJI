@@ -82,7 +82,6 @@ if __name__ == '__main__':
     # Question 1 - split data into train and test sets
     df = pd.read_csv("../datasets/house_prices.csv",
                      delimiter=",").dropna().drop_duplicates()
-    df = df[df["price"] > 0]
 
     # Question 2 - Preprocessing of housing prices dataset
     X, _ = preprocess_data(df, None)
