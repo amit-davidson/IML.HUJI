@@ -28,13 +28,17 @@ def preprocess_data(X: pd.DataFrame, y: Optional[pd.Series] = None):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    X = X.drop(columns=["id", "date"])
-    X = pd.get_dummies(X, prefix="zipcode", columns=["zipcode"])
-    X = X[X["sqft_living"] > 0]
+    X = X.drop(columns=["id", "date", "sqft_living15", "sqft_lot15"])
+    X = X[X["bedrooms"] < 15]
+    X = X[X["sqft_lot"] < 10000000]
 
     for column in ["bathrooms", "floors", "bedrooms"]:
         X = X[X[column] >= 0]
-
+    #
+    for column in ["yr_built", "zipcode", "price", "sqft_living"]:
+        X = X[X[column] > 0]
+    #
+    X = pd.get_dummies(X, prefix="zipcode", columns=["zipcode"])
     return X, y
 
 
@@ -80,11 +84,10 @@ if __name__ == '__main__':
                      delimiter=",").dropna().drop_duplicates()
     df = df[df["price"] > 0]
 
-    y = df["price"]
-    X = df.drop(columns=["price"])
-
     # Question 2 - Preprocessing of housing prices dataset
-    X, y = preprocess_data(X, y)
+    X, _ = preprocess_data(df, None)
+    y = X["price"]
+    X = X.drop(columns=["price"])
     train_X, train_y, test_X, test_y = split_train_test(X, y)
 
     # Question 3 - Feature evaluation with respect to response
