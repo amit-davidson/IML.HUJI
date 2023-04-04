@@ -82,15 +82,15 @@ if __name__ == '__main__':
     # Question 1 - split data into train and test sets
     df = pd.read_csv("../datasets/house_prices.csv",
                      delimiter=",").dropna().drop_duplicates()
+    train_X, _, test_X, _ = split_train_test(df, None)
 
     # Question 2 - Preprocessing of housing prices dataset
-    X, _ = preprocess_data(df, None)
-    y = X["price"]
-    X = X.drop(columns=["price"])
-    train_X, train_y, test_X, test_y = split_train_test(X, y)
+    train_X, _ = preprocess_data(train_X, None)
+    train_y = train_X["price"]
+    train_X = train_X.drop(columns=["price"])
 
     # Question 3 - Feature evaluation with respect to response
-    feature_evaluation(X, y)
+    feature_evaluation(train_X, train_y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -99,6 +99,10 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
+    test_X, _ = preprocess_data(test_X, None)
+    test_y = test_X["price"]
+    test_X = test_X.drop(columns=["price"])
+
     res = np.zeros((91, 10))
     test_x_arr = test_X.to_numpy()
     test_y_arr = test_y.to_numpy()
@@ -125,8 +129,8 @@ if __name__ == '__main__':
     layout = go.Layout(
         title={"text": "Loss values as a function of test percentage",
                "x": 0.5},
-        xaxis={"title": "Loss value"},
-        yaxis={"title": "Test percentage"},
+        xaxis={"title": "Test percentage  %p"},
+        yaxis={"title": "Loss value"},
     )
     fig = go.Figure(data=scatter, layout=layout)
     fig.write_image(f"LossValuesAsAFunctionOfTestPercentage.png")
