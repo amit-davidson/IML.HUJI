@@ -33,12 +33,16 @@ def preprocess_data(X: pd.DataFrame, y: Optional[pd.Series] = None):
     X = X[X["sqft_lot"] < 10000000]
 
     for column in ["bathrooms", "floors", "bedrooms"]:
-        X = X[X[column] >= 0]
+        if column in X.columns:
+            X = X[X[column] >= 0]
     #
     for column in ["yr_built", "zipcode", "price", "sqft_living"]:
-        X = X[X[column] > 0]
+        if column in X.columns:
+            X = X[X[column] > 0]
     #
     X = pd.get_dummies(X, prefix="zipcode", columns=["zipcode"])
+    if y is not None:
+        y = y.where(lambda price : price > 0)
     return X, y
 
 
@@ -129,7 +133,7 @@ if __name__ == '__main__':
     layout = go.Layout(
         title={"text": "Loss values as a function of test percentage",
                "x": 0.5},
-        xaxis={"title": "Test percentage  %p"},
+        xaxis={"title": "Test percentage %p"},
         yaxis={"title": "Loss value"},
     )
     fig = go.Figure(data=scatter, layout=layout)
