@@ -72,7 +72,27 @@ def main():
         .write_image("TestErrorAsAFunctionOfDegree.png")
 
     # Question 5 - Evaluating fitted model on different countries
-    raise NotImplementedError()
+    best_k = pf_result.index(min(pf_result)) + 1
+    pf = PolynomialFitting(best_k)
+    pf.fit(israel_df["DayOfYear"], israel_df["Temp"])
+
+    other_countries_result = []
+    countries = df["Country"].drop_duplicates()
+    countries = countries[countries != "Israel"]
+
+    for country in countries:
+        country_df = df.loc[df['Country'] == country]
+        other_countries_result.append(
+            round(pf.loss(country_df["DayOfYear"].to_numpy(),
+                          country_df["Temp"].to_numpy()), 2))
+
+    px.bar(x=countries, y=other_countries_result,
+           title="Loss Of Different Countries For a Model Fitted Over Israel",
+           color=countries, text=other_countries_result) \
+        .update_layout(xaxis_title="Country",
+                       yaxis_title="TestError",
+                       title_x=0.5) \
+        .write_image("LossAsAFunctionOfCountryForAModelFittedOverIsrael.png")
 
 
 if __name__ == '__main__':
