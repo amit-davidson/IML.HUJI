@@ -22,18 +22,33 @@ def load_data(filename: str) -> pd.DataFrame:
     -------
     Design matrix and response vector (Temp)
     """
-    df = pd.read_csv(filename, delimiter=",", parse_dates=["Date"]).dropna().drop_duplicates()
+    df = pd.read_csv(filename, delimiter=",",
+                     parse_dates=["Date"]).dropna().drop_duplicates()
+    df = df[df["Temp"] > 0]
+
     df["DayOfYear"] = df["Date"].dt.dayofyear
+    df["MonthNum"] = df["Date"].dt.month
     return df
 
 
-if __name__ == '__main__':
-    np.random.seed(0)
+def main():
     # Question 1 - Load and preprocessing of city temperature dataset
-    load_data("datasets/City_Temperature.csv")
-    raise NotImplementedError()
-
+    df = load_data("../datasets/City_Temperature.csv")
     # Question 2 - Exploring data for specific country
+    israel_df = df.loc[df['Country'] == "Israel"]
+    px.scatter(israel_df, x="DayOfYear", y="Temp", color="Year") \
+        .write_image("israelDailyTemperatures.png")
+
+    monthly_temp_std = df.groupby(["MonthNum"])['Temp'].std()
+
+    px.bar(x=df['MonthNum'].drop_duplicates(), y=monthly_temp_std,
+           title="Monthly Average Tempartures") \
+        .update_layout(title="Average Monthly Temperatures",
+                       xaxis_title="Month",
+                       yaxis_title="Avg Temperature",
+                       title_x=0.5) \
+        .write_image("monthTempStd.png")
+
     raise NotImplementedError()
 
     # Question 3 - Exploring differences between countries
@@ -44,3 +59,8 @@ if __name__ == '__main__':
 
     # Question 5 - Evaluating fitted model on different countries
     raise NotImplementedError()
+
+
+if __name__ == '__main__':
+    np.random.seed(0)
+    main()

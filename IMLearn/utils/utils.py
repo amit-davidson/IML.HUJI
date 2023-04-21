@@ -1,11 +1,10 @@
-import random
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 import pandas as pd
 
 
-def split_train_test(X: pd.DataFrame, y: pd.Series,
+def split_train_test(X: pd.DataFrame, y: Optional[pd.Series] = None,
                      train_proportion: float = .75) \
         -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
