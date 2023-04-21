@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
+
 pio.templates.default = "simple_white"
 
 
@@ -21,12 +22,15 @@ def load_data(filename: str) -> pd.DataFrame:
     -------
     Design matrix and response vector (Temp)
     """
-    raise NotImplementedError()
+    df = pd.read_csv(filename, delimiter=",", parse_dates=["Date"]).dropna().drop_duplicates()
+    df["DayOfYear"] = df["Date"].dt.dayofyear
+    return df
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of city temperature dataset
+    load_data("datasets/City_Temperature.csv")
     raise NotImplementedError()
 
     # Question 2 - Exploring data for specific country
