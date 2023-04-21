@@ -39,9 +39,9 @@ def main():
     px.scatter(israel_df, x="DayOfYear", y="Temp", color="Year") \
         .write_image("israelDailyTemperatures.png")
 
-    monthly_temp_std = df.groupby(["MonthNum"])['Temp'].std()
+    monthly_temp_std = israel_df.groupby(["MonthNum"])['Temp'].std()
 
-    px.bar(x=df['MonthNum'].drop_duplicates(), y=monthly_temp_std,
+    px.bar(x=israel_df['MonthNum'].drop_duplicates(), y=monthly_temp_std,
            title="Monthly Average Tempartures") \
         .update_layout(title="Average Monthly Temperatures",
                        xaxis_title="Month",
