@@ -63,6 +63,7 @@ def main():
         pf.fit(trainX, trainY)
         pf_result.append(round(pf.loss(testX.to_numpy(), testY.to_numpy()), 2))
 
+    print(pf_result)
     px.bar(x=range(1, 11), y=pf_result,
            title="Test Error As a Function of Degree") \
         .update_layout(xaxis_title="Degree",
