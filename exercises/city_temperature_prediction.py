@@ -41,9 +41,8 @@ def main():
     monthly_temp_std = israel_df.groupby(["Month"])['Temp'].std()
 
     px.bar(x=israel_df['Month'].drop_duplicates(), y=monthly_temp_std,
-           title="Monthly Average Tempartures") \
-        .update_layout(title="Average Monthly Temperatures",
-                       xaxis_title="Month",
+           title="Monthly Average Temperatures") \
+        .update_layout(xaxis_title="Month",
                        yaxis_title="Avg Temperature",
                        title_x=0.5) \
         .write_image("monthTempStd.png")
@@ -55,7 +54,21 @@ def main():
         .write_image("MeanTemperaturesInDifferentCountries.png")
 
     # Question 4 - Fitting model for different values of `k`
-    raise NotImplementedError()
+    X = df["DayOfYear"]
+    y = df["Temp"]
+    pf_result = []
+    trainX, trainY, testX, testY = split_train_test(X, y)
+    for k in range(1, 11):
+        pf = PolynomialFitting(k)
+        pf.fit(trainX, trainY)
+        pf_result.append(round(pf.loss(testX.to_numpy(), testY.to_numpy()), 2))
+
+    px.bar(x=range(1, 11), y=pf_result,
+           title="Test Error As a Function of Degree") \
+        .update_layout(xaxis_title="Degree",
+                       yaxis_title="TestError",
+                       title_x=0.5) \
+        .write_image("TestErrorAsAFunctionOfDegree.png")
 
     # Question 5 - Evaluating fitted model on different countries
     raise NotImplementedError()
