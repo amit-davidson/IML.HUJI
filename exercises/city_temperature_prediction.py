@@ -27,7 +27,6 @@ def load_data(filename: str) -> pd.DataFrame:
     df = df[df["Temp"] > 0]
 
     df["DayOfYear"] = df["Date"].dt.dayofyear
-    df["MonthNum"] = df["Date"].dt.month
     return df
 
 
@@ -39,9 +38,9 @@ def main():
     px.scatter(israel_df, x="DayOfYear", y="Temp", color="Year") \
         .write_image("israelDailyTemperatures.png")
 
-    monthly_temp_std = israel_df.groupby(["MonthNum"])['Temp'].std()
+    monthly_temp_std = israel_df.groupby(["Month"])['Temp'].std()
 
-    px.bar(x=israel_df['MonthNum'].drop_duplicates(), y=monthly_temp_std,
+    px.bar(x=israel_df['Month'].drop_duplicates(), y=monthly_temp_std,
            title="Monthly Average Tempartures") \
         .update_layout(title="Average Monthly Temperatures",
                        xaxis_title="Month",
@@ -49,10 +48,11 @@ def main():
                        title_x=0.5) \
         .write_image("monthTempStd.png")
 
-    raise NotImplementedError()
-
     # Question 3 - Exploring differences between countries
-    raise NotImplementedError()
+    gb = df.groupby(["Country", "Month"], as_index=False).agg(
+        mean=("Temp", "mean"), std=("Temp", "std"))
+    px.line(gb, x="Month", y="mean", error_y="std", color="Country") \
+        .write_image("MeanTemperaturesInDifferentCountries.png")
 
     # Question 4 - Fitting model for different values of `k`
     raise NotImplementedError()
