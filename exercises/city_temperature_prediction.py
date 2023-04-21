@@ -54,8 +54,8 @@ def main():
         .write_image("MeanTemperaturesInDifferentCountries.png")
 
     # Question 4 - Fitting model for different values of `k`
-    X = df["DayOfYear"]
-    y = df["Temp"]
+    X = israel_df["DayOfYear"]
+    y = israel_df["Temp"]
     pf_result = []
     trainX, trainY, testX, testY = split_train_test(X, y)
     for k in range(1, 11):
