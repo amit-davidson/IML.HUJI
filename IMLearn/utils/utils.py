@@ -35,14 +35,10 @@ def split_train_test(X: pd.DataFrame, y: Optional[pd.Series] = None,
         Responses of test samples
 
     """
-    train_Y = None
-    test_Y = None
     train_X = X.sample(frac=train_proportion)
-    if y is not None:
-        train_Y = y.loc[train_X.index]
+    train_Y = y.loc[train_X.index]
     test_X = X.loc[X.index.difference(train_X.index)]
-    if y is not None:
-        test_Y = y.loc[test_X.index]
+    test_Y = y.loc[test_X.index]
     return train_X, train_Y, test_X, test_Y
 
 

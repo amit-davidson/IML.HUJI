@@ -15,6 +15,10 @@ def get_pearson_correlation(x: np.ndarray, y: np.ndarray) -> float:
     return np.cov(x, y)[1, 0] / (np.std(x) * np.std(y))
 
 
+avg_values = []
+columns_dummies = []
+
+
 def preprocess_data(X: pd.DataFrame, y: Optional[pd.Series] = None):
     """
     Load house prices dataset and preprocess data.
@@ -28,22 +32,33 @@ def preprocess_data(X: pd.DataFrame, y: Optional[pd.Series] = None):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    X = X.drop(columns=["id", "date", "sqft_living15", "sqft_lot15"])
-    X = X[X["bedrooms"] < 15]
-    X = X[X["sqft_lot"] < 10000000]
-
-    for column in ["bathrooms", "floors", "bedrooms"]:
-        if column in X.columns:
-            X = X[X[column] >= 0]
-    #
-    for column in ["yr_built", "zipcode", "price", "sqft_living"]:
-        if column in X.columns:
-            X = X[X[column] > 0]
-    #
-    X = pd.get_dummies(X, prefix="zipcode", columns=["zipcode"])
+    global avg_values, columns_dummies
+    # Train
     if y is not None:
-        y = y.where(lambda price : price > 0)
-    return X, y
+        df = X.assign(price=y.values)
+        df = df[df["bedrooms"] < 15]
+        df = df[df["sqft_lot"] < 10000000]
+
+        for column in ["bathrooms", "floors", "bedrooms"]:
+            if column in df.columns:
+                df = df[df[column] >= 0]
+        #
+        for column in ["yr_built", "zipcode", "price", "sqft_living"]:
+            if column in X.columns:
+                df = df[df[column] > 0]
+        #
+        df = pd.get_dummies(df, prefix="zipcode", columns=["zipcode"])
+        y = df["price"]
+        X = df.drop(columns=["price"])
+        avg_values = X.mean()
+        columns_dummies = X.columns
+        return X, y
+    # Test
+    else:
+        X = X.fillna(avg_values)
+        X = pd.get_dummies(X, prefix="zipcode", columns=["zipcode"])
+        X = X.reindex(columns=columns_dummies, fill_value=0)
+        return X, None
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series,
@@ -81,17 +96,21 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series,
         fig.write_image(f"CorrelationBetween{column}AndPrice.png")
 
 
-if __name__ == '__main__':
-    np.random.seed(0)
+def main():
     # Question 1 - split data into train and test sets
     df = pd.read_csv("../datasets/house_prices.csv",
-                     delimiter=",").dropna().drop_duplicates()
-    train_X, _, test_X, _ = split_train_test(df, None)
+                     delimiter=",").drop_duplicates()
+    df = df.drop(columns=["id", "date", "sqft_living15", "sqft_lot15"])
+
+    df = df.dropna(subset=['price'])
+
+    y = df["price"]
+    X = df.drop(columns=["price"])
+
+    train_X, train_y, test_X, test_y = split_train_test(X, y)
 
     # Question 2 - Preprocessing of housing prices dataset
-    train_X, _ = preprocess_data(train_X, None)
-    train_y = train_X["price"]
-    train_X = train_X.drop(columns=["price"])
+    train_X, train_y = preprocess_data(train_X, train_y)
 
     # Question 3 - Feature evaluation with respect to response
     feature_evaluation(train_X, train_y)
@@ -104,8 +123,6 @@ if __name__ == '__main__':
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
     test_X, _ = preprocess_data(test_X, None)
-    test_y = test_X["price"]
-    test_X = test_X.drop(columns=["price"])
 
     res = np.zeros((91, 10))
     test_x_arr = test_X.to_numpy()
@@ -138,3 +155,8 @@ if __name__ == '__main__':
     )
     fig = go.Figure(data=scatter, layout=layout)
     fig.write_image(f"LossValuesAsAFunctionOfTestPercentage.png")
+
+
+if __name__ == '__main__':
+    np.random.seed(0)
+    main()
