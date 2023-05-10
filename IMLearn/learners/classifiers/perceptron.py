@@ -75,18 +75,21 @@ class Perceptron(BaseEstimator):
         -----
         Fits model with or without an intercept depending on value of `self.fit_intercept_`
         """
-        w: np.ndarray = np.zeros(X.shape[1])
+        if self.include_intercept_:
+            X = np.c_[np.ones(X.shape[0]), X]
+
+        self.coefs_ = np.zeros(X.shape[1])
         for _ in range(self.max_iter_):
             modified: bool = False
             for i, sample in enumerate(X):
-                if y[i] * w.dot(sample) <= 0:
+                if y[i] * self.coefs_.dot(sample) <= 0:
                     modified = True
-                    self.callback_(self, w, y[i])
-                    w += y[i] * sample[i]
+                    self.coefs_ += y[i] * sample
+                    self.callback_(self, self.coefs_, y[i])
                     break
             if not modified:
-                self.callback_(self, w, -1)
-            return w
+                self.callback_(self, self.coefs_, -1)
+                return
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -104,7 +107,7 @@ class Perceptron(BaseEstimator):
         """
         if self.include_intercept_:
             X = np.c_[np.ones(X.shape[0]), X]
-        return X @ self.coefs_
+        return np.sign(X @ self.coefs_)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

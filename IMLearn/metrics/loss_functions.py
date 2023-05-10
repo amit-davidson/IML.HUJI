@@ -38,7 +38,7 @@ def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray,
     -------
     Misclassification of given predictions
     """
-    equal_count: float = np.sum(y_pred == y_true)
+    equal_count: float = np.sum(y_pred != y_true)
     if normalize:
         return equal_count / len(y_true)
     return equal_count
