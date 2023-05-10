@@ -31,10 +31,12 @@ class Perceptron(BaseEstimator):
             A callable to be called after each update of the model while fitting to given data
             Callable function should receive as input a Perceptron instance, current sample and current response
     """
+
     def __init__(self,
                  include_intercept: bool = True,
                  max_iter: int = 1000,
-                 callback: Callable[[Perceptron, np.ndarray, int], None] = default_callback):
+                 callback: Callable[
+                     [Perceptron, np.ndarray, int], None] = default_callback):
         """
         Instantiate a Perceptron classifier
 
@@ -73,7 +75,18 @@ class Perceptron(BaseEstimator):
         -----
         Fits model with or without an intercept depending on value of `self.fit_intercept_`
         """
-        raise NotImplementedError()
+        w: np.ndarray = np.zeros(X.shape[1])
+        for _ in range(self.max_iter_):
+            modified: bool = False
+            for i, sample in enumerate(X):
+                if y[i] * w.dot(sample) <= 0:
+                    modified = True
+                    self.callback_(self, w, y[i])
+                    w += y[i] * sample[i]
+                    break
+            if not modified:
+                self.callback_(self, w, -1)
+            return w
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -89,7 +102,9 @@ class Perceptron(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.c_[np.ones(X.shape[0]), X]
+        return X @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -109,4 +124,5 @@ class Perceptron(BaseEstimator):
             Performance under missclassification loss function
         """
         from ...metrics import misclassification_error
-        raise NotImplementedError()
+        y_pred = self._predict(X)
+        return misclassification_error(y, y_pred)
