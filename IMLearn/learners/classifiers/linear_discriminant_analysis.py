@@ -55,8 +55,8 @@ class LDA(BaseEstimator):
             cols.append((1 / _classes_count) * np.bincount(y, X[:, i]))
         self.mu_ = np.column_stack(cols)
 
-        c = X - self.mu_[y.astype(int)]
-        self.cov_ = np.einsum("ki,kj->kij", c, c).sum(axis=0) / (
+        d = X - self.mu_[y.astype(int)]
+        self.cov_ = np.einsum("ki,kj->kij", d, d).sum(axis=0) / (
                     len(X) - len(self.classes_))
         self._cov_inv = inv(self.cov_)
 
@@ -74,7 +74,7 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        return self.classes_[np.argmax(self.likelihood(X), axis=1)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -95,6 +95,14 @@ class LDA(BaseEstimator):
             raise ValueError(
                 "Estimator must first be fitted before calling `likelihood` function")
 
+        res = np.zeros(shape=(len(self.classes_), len(X)))
+        for i, class_ in enumerate(self.classes_):
+            d = X - self.mu_[class_]
+            mahalanobis = (d @ inv(self.cov_) * d).sum(-1)
+            N = np.exp(- mahalanobis / 2) / np.sqrt(np.power(2 * np.pi, len(X[0])) * det(self.cov_))
+            res[i] = N * self.pi_[i]
+        return res.T
+
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -114,4 +122,4 @@ class LDA(BaseEstimator):
             Performance under missclassification loss function
         """
         from ...metrics import misclassification_error
-        raise NotImplementedError()
+        return misclassification_error(y_true=y, y_pred=self._predict(X))
