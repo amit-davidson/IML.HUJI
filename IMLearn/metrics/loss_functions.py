@@ -59,8 +59,8 @@ def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     Accuracy of given predictions
     """
-    raise NotImplementedError()
-
+    equal_count: float = np.sum(y_pred != y_true)
+    return equal_count / len(y_true)
 
 def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
