@@ -95,7 +95,7 @@ class LDA(BaseEstimator):
             raise ValueError(
                 "Estimator must first be fitted before calling `likelihood` function")
 
-        res = np.zeros(shape=(len(self.classes_), len(X)))
+        res = np.empty(shape=(len(self.classes_), len(X)))
         for i, class_ in enumerate(self.classes_):
             d = X - self.mu_[class_]
             mahalanobis = (d @ inv(self.cov_) * d).sum(-1)
