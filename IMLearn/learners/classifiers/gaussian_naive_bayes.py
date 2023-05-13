@@ -2,10 +2,12 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 
+
 class GaussianNaiveBayes(BaseEstimator):
     """
     Gaussian Naive-Bayes classifier
     """
+
     def __init__(self):
         """
         Instantiate a Gaussian Naive Bayes classifier
@@ -39,7 +41,18 @@ class GaussianNaiveBayes(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.classes_, _classes_count = np.unique(y, return_counts=True)
+        self.pi_ = _classes_count / len(y)
+        cols = []
+        for i in range(X.shape[1]):
+            cols.append((1 / _classes_count) * np.bincount(y, X[:, i]))
+        self.mu_ = np.column_stack(cols)
+
+        self.vars_ = np.empty(shape=(len(X[0]), len(self.classes_)))
+        d = np.power(X - self.mu_[y.astype(int)], 2)
+        for i in range(X.shape[1]):
+            self.vars_[i] = (1 / _classes_count) * np.bincount(y, d[:, i])
+        self.vars_ = self.vars_.T
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -73,7 +86,8 @@ class GaussianNaiveBayes(BaseEstimator):
 
         """
         if not self.fitted_:
-            raise ValueError("Estimator must first be fitted before calling `likelihood` function")
+            raise ValueError(
+                "Estimator must first be fitted before calling `likelihood` function")
 
         raise NotImplementedError()
 

@@ -55,6 +55,7 @@ class LDA(BaseEstimator):
             cols.append((1 / _classes_count) * np.bincount(y, X[:, i]))
         self.mu_ = np.column_stack(cols)
 
+        # todo: replace!!!!!!!!
         d = X - self.mu_[y.astype(int)]
         self.cov_ = np.einsum("ki,kj->kij", d, d).sum(axis=0) / (
                     len(X) - len(self.classes_))
