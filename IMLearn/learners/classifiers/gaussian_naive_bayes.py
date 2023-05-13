@@ -89,7 +89,17 @@ class GaussianNaiveBayes(BaseEstimator):
             raise ValueError(
                 "Estimator must first be fitted before calling `likelihood` function")
 
-        raise NotImplementedError()
+        l = np.exp((X[:, np.newaxis, :] - self.mu_) ** 2 / (
+                - 2 * self.vars_)) / np.sqrt(2 * np.pi * self.vars_)
+        t = np.prod(l, axis=2) * self.pi_
+
+        likelihoods = np.empty(shape=(len(X), len(self.classes_)))
+        for class_ in range(self.classes_.shape[0]):
+            factor = 1 / np.sqrt(2 * np.pi * self.vars_[class_])
+            pdfs = factor * np.exp(- (X - self.mu_[class_]) ** 2 / (2 * self.vars_[class_]))
+            joint_pdf = np.prod(pdfs, axis=1) * self.pi_[class_]
+            likelihoods[:, class_] = joint_pdf
+        return likelihoods
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
