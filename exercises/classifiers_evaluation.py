@@ -109,37 +109,39 @@ def compare_gaussian_classifiers():
         from IMLearn.metrics import accuracy
         fig = make_subplots(rows=1, cols=2,
                             subplot_titles=(
-                                f"Gaussian Naive Bayes accuracy={np.round(accuracy(y, gnb_prediction), 2)}",
-                                f"LDA accuracy={np.round(accuracy(y, lda_prediction), 2)}")
+                                f"Gaussian Naive Bayes accuracy={1 - np.round(accuracy(y, gnb_prediction), 2)}",
+                                f"LDA accuracy={1 - np.round(accuracy(y, lda_prediction), 2)}"),
                             )
-
+        fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
+                                 marker=dict(color=gnb_prediction,
+                                             symbol=class_symbols[y])), row=1,
+                      col=1)
+        fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
+                                 marker=dict(color=lda_prediction,
+                                             symbol=class_symbols[y])), row=1,
+                      col=2)
         # Add traces for data-points setting symbols and colors
-        fig.add_traces([go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
-                                   marker=dict(color=gnb_prediction,
-                                               symbol=class_symbols[y])),
-                        go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
-                                   marker=dict(color=lda_prediction,
-                                               symbol=class_symbols[y]))],
-                       rows=[1, 1], cols=[1, 2])
-        fig.write_image(f"lda.vs.naive.bayes.{f[:-4]}.png")
-
-        # fig = px.line(x=list(range(len(losses))), y=losses)
-        # fig.update_layout(
-        #     title=f"Error of Perceptron over {n}",
-        #     xaxis_title="Iteration",
-        #     yaxis_title="Error",
-        #     title_x=0.5,
-        # )
-        # fig.write_image(f"perceptron_fit_over_{n}.png")
-
-        # Add traces for data-points setting symbols and colors
-        raise NotImplementedError()
 
         # Add `X` dots specifying fitted Gaussians' means
-        raise NotImplementedError()
+        fig.add_trace(
+            go.Scatter(x=gnb.mu_[:, 0], y=gnb.mu_[:, 1], mode='markers',
+                       marker=dict(color='black',
+                                   symbol='x')), row=1, col=1)
+        fig.add_trace(
+            go.Scatter(x=lda.mu_[:, 0], y=lda.mu_[:, 1], mode='markers',
+                       marker=dict(color='black',
+                                   symbol='x')), row=1, col=2)
 
         # Add ellipses depicting the covariances of the fitted Gaussians
-        raise NotImplementedError()
+        for i in range(len(gnb.classes_)):
+            fig.add_trace(get_ellipse(gnb.mu_[i], np.diag(gnb.vars_[i])),
+                          row=1, col=1)
+            fig.add_trace(get_ellipse(lda.mu_[i], lda.cov_), row=1, col=2)
+
+        fig.update_layout(title_text=f"{f[:-4]} dataset", showlegend=False,
+                          title_x=0.5,
+                          )
+        fig.write_image(f"GaussianNaiveBayesAndLDA.{f[:-4]}.png")
 
 
 if __name__ == '__main__':
