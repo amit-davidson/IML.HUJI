@@ -55,10 +55,12 @@ class LDA(BaseEstimator):
             cols.append((1 / _classes_count) * np.bincount(y, X[:, i]))
         self.mu_ = np.column_stack(cols)
 
-        # todo: replace!!!!!!!!
-        d = X - self.mu_[y.astype(int)]
-        self.cov_ = np.einsum("ki,kj->kij", d, d).sum(axis=0) / (
-                    len(X) - len(self.classes_))
+        self.cov_ = np.empty((len(X[0]), len(X[0])))
+        for _class in self.classes_:
+            d = X[y == _class] - self.mu_[_class]
+            self.cov_ += np.apply_along_axis(lambda y: np.outer(y, y),
+                                                    axis=1, arr=d).sum(axis=0)
+        self.cov_ /= len(X) - len(self.classes_)
         self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -100,10 +102,10 @@ class LDA(BaseEstimator):
         for i, class_ in enumerate(self.classes_):
             d = X - self.mu_[class_]
             mahalanobis = (d @ inv(self.cov_) * d).sum(-1)
-            N = np.exp(- mahalanobis / 2) / np.sqrt(np.power(2 * np.pi, len(X[0])) * det(self.cov_))
+            N = np.exp(- mahalanobis / 2) / np.sqrt(
+                np.power(2 * np.pi, len(X[0])) * det(self.cov_))
             res[i] = N * self.pi_[i]
         return res.T
-
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

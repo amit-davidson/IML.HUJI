@@ -114,12 +114,14 @@ def compare_gaussian_classifiers():
                             )
         fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
                                  marker=dict(color=gnb_prediction,
-                                             symbol=class_symbols[y])), row=1,
-                      col=1)
+                                             symbol=class_symbols[y],
+                                             colorscale=class_colors(3))),
+                      row=1, col=1)
         fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
                                  marker=dict(color=lda_prediction,
-                                             symbol=class_symbols[y])), row=1,
-                      col=2)
+                                             symbol=class_symbols[y],
+                                             colorscale=class_colors(3))),
+                      row=1, col=2)
         # Add traces for data-points setting symbols and colors
 
         # Add `X` dots specifying fitted Gaussians' means
