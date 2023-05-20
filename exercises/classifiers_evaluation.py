@@ -109,8 +109,8 @@ def compare_gaussian_classifiers():
         from IMLearn.metrics import accuracy
         fig = make_subplots(rows=1, cols=2,
                             subplot_titles=(
-                                f"Gaussian Naive Bayes accuracy={1 - np.round(accuracy(y, gnb_prediction), 2)}",
-                                f"LDA accuracy={1 - np.round(accuracy(y, lda_prediction), 2)}"),
+                                f"Gaussian Naive Bayes accuracy={np.round(accuracy(y, gnb_prediction), 2)}",
+                                f"LDA accuracy={np.round(accuracy(y, lda_prediction), 2)}"),
                             )
         fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
                                  marker=dict(color=gnb_prediction,
