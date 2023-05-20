@@ -143,6 +143,12 @@ def compare_gaussian_classifiers():
         fig.update_layout(title_text=f"{f[:-4]} dataset", showlegend=False,
                           title_x=0.5,
                           )
+        fig.update_xaxes(title_text="feature1", row=1, col=1)
+        fig.update_yaxes(title_text="feature2", row=1, col=1)
+
+        fig.update_xaxes(title_text="feature1", row=1, col=2)
+        fig.update_yaxes(title_text="feature2", row=1, col=2)
+
         fig.write_image(f"GaussianNaiveBayesAndLDA.{f[:-4]}.png")
 
 
