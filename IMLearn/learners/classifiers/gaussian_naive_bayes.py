@@ -44,15 +44,10 @@ class GaussianNaiveBayes(BaseEstimator):
         self.classes_, _classes_count = np.unique(y, return_counts=True)
         self.pi_ = _classes_count / len(y)
         cols = []
-        for i in range(X.shape[1]):
-            cols.append((1 / _classes_count) * np.bincount(y, X[:, i]))
-        self.mu_ = np.column_stack(cols)
-
-        self.vars_ = np.empty(shape=(len(X[0]), len(self.classes_)))
-        d = np.power(X - self.mu_[y.astype(int)], 2)
-        for i in range(X.shape[1]):
-            self.vars_[i] = (1 / _classes_count) * np.bincount(y, d[:, i])
-        self.vars_ = self.vars_.T
+        for i in range(len(self.classes_)):
+            cols.append(np.mean(X[y == self.classes_[i]], axis=0))
+        self.mu_ = np.row_stack(cols)
+        self.vars_ = np.array([np.var(X[y == c], axis=0, ddof=1) for c in self.classes_])
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
