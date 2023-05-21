@@ -50,16 +50,14 @@ class LDA(BaseEstimator):
         self.classes_, _classes_count = np.unique(y, return_counts=True)
         self.pi_ = _classes_count / len(y)
 
-        cols = []
-        for i in range(X.shape[1]):
-            cols.append((1 / _classes_count) * np.bincount(y, X[:, i]))
-        self.mu_ = np.column_stack(cols)
-
         self.cov_ = np.empty((len(X[0]), len(X[0])))
-        for _class in self.classes_:
-            d = X[y == _class] - self.mu_[_class]
+        cols = []
+        for i, _class in enumerate(self.classes_):
+            cols.append(np.mean(X[y == _class], axis=0))
+            d = X[y == _class] - cols[i]
             self.cov_ += np.apply_along_axis(lambda y: np.outer(y, y),
-                                                    axis=1, arr=d).sum(axis=0)
+                                             axis=1, arr=d).sum(axis=0)
+        self.mu_ = np.row_stack(cols)
         self.cov_ /= len(X) - len(self.classes_)
         self._cov_inv = inv(self.cov_)
 
@@ -100,7 +98,7 @@ class LDA(BaseEstimator):
 
         res = np.empty(shape=(len(self.classes_), len(X)))
         for i, class_ in enumerate(self.classes_):
-            d = X - self.mu_[class_]
+            d = X - self.mu_[i]
             mahalanobis = (d @ inv(self.cov_) * d).sum(-1)
             N = np.exp(- mahalanobis / 2) / np.sqrt(
                 np.power(2 * np.pi, len(X[0])) * det(self.cov_))
