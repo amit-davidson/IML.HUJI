@@ -76,7 +76,8 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        return np.where(X[:self.j_] >= self.threshold_, self.sign_, -self.sign_)
+        return np.where(X[:self.j_] >= self.threshold_, self.sign_,
+                        -self.sign_)
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray,
                         sign: int) -> Tuple[float, float]:
@@ -116,10 +117,15 @@ class DecisionStump(BaseEstimator):
         for i in range(len(values) + 1):
             before_label, after_label = labels[:i], labels[i:]
             before_values, after_values = values[:i], values[i:]
-            error = misclassification_error(before_label, before_values,
-                                            normalize=True) + \
-                    misclassification_error(after_label, after_values,
-                                            normalize=True)
+            error1 = 0
+            error2 = 0
+            if not i == 0:
+                error1 = misclassification_error(before_label, before_values,
+                                                 normalize=True)
+            if not i == len(values):
+                error2 = misclassification_error(after_label, after_values,
+                                                 normalize=True)
+            error = error1 + error2
 
             if error < min_error:
                 min_error = error
