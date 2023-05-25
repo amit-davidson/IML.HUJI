@@ -4,6 +4,8 @@ from ...base import BaseEstimator
 import numpy as np
 from itertools import product
 
+from ...metrics import misclassification_error
+
 
 class DecisionStump(BaseEstimator):
     """
@@ -20,6 +22,7 @@ class DecisionStump(BaseEstimator):
     self.sign_: int
         The label to predict for samples where the value of the j'th feature is about the threshold
     """
+
     def __init__(self) -> DecisionStump:
         """
         Instantiate a Decision stump classifier
@@ -39,7 +42,17 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        _, n_features = X.shape
+        min_error = float('inf')
+
+        # We iterate on over all features. We are not sure if values above a
+        # certain threshold are good or bad, so we try both labels
+        for feature, sign in product(range(n_features), [-1, 1]):
+            error, threshold = self._find_threshold(X[:, feature], y, sign)
+            if error < min_error:
+                self.sign_ = sign
+                self.threshold_ = threshold
+                self.j_ = feature
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -65,7 +78,8 @@ class DecisionStump(BaseEstimator):
         """
         raise NotImplementedError()
 
-    def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
+    def _find_threshold(self, values: np.ndarray, labels: np.ndarray,
+                        sign: int) -> Tuple[float, float]:
         """
         Given a feature vector and labels, find a threshold by which to perform a split
         The threshold is found according to the value minimizing the misclassification
@@ -95,7 +109,23 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        error = labels[labels * sign < 0].sum()
+        min_error = error
+        best_i = -1
+
+        for i in range(len(values) + 1):
+            before_label, after_label = labels[:i], labels[i:]
+            before_values, after_values = values[:i], values[i:]
+            error = misclassification_error(before_label, before_values,
+                                            normalize=True) + \
+                    misclassification_error(after_label, after_values,
+                                            normalize=True)
+
+            if error < min_error:
+                min_error = error
+                best_i = i
+
+        return values[best_i], min_error
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
