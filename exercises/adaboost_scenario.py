@@ -38,15 +38,41 @@ def generate_data(n: int, noise_ratio: float) -> Tuple[np.ndarray, np.ndarray]:
     return X, y
 
 
-def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=500):
-    (train_X, train_y), (test_X, test_y) = generate_data(train_size, noise), generate_data(test_size, noise)
+def fit_and_evaluate_adaboost(noise=0, n_learners=250, train_size=5000,
+                              test_size=500):
+    (train_X, train_y), (test_X, test_y) = generate_data(train_size,
+                                                         noise), generate_data(
+        test_size, noise)
 
     # Question 1: Train- and test errors of AdaBoost in noiseless case
-    raise NotImplementedError()
+    ab = AdaBoost(lambda: DecisionStump(), n_learners)
+    ab.fit(train_X, train_y)
+
+    train_losses = list()
+    test_losses = list()
+    for i in range(1, n_learners + 1):
+        train_losses.append(ab.partial_predict(train_X, i))
+        test_losses.append(ab.partial_predict(test_X, i))
+
+    fig = px.line()
+    fig.add_trace(go.Scatter(x=list(range(1, n_learners + 1)), y=test_losses,
+                             mode='markers'))
+    fig.add_trace(go.Scatter(x=list(range(1, n_learners + 1)), y=train_losses,
+                             mode='markers'))
+
+    fig.update_layout(
+        title=f"Error of AdaBoost using DecisionStump of train and test sets as a function of iteration count",
+        xaxis_title="Iteration",
+        yaxis_title="Error",
+        title_x=0.5,
+    )
+    fig.write_image(f"AdaBoostErrorAsAFunctionOfIterations.png")
 
     # Question 2: Plotting decision surfaces
     T = [5, 50, 100, 250]
-    lims = np.array([np.r_[train_X, test_X].min(axis=0), np.r_[train_X, test_X].max(axis=0)]).T + np.array([-.1, .1])
+    lims = np.array([np.r_[train_X, test_X].min(axis=0),
+                     np.r_[train_X, test_X].max(axis=0)]).T + np.array(
+        [-.1, .1])
     raise NotImplementedError()
 
     # Question 3: Decision surface of best performing ensemble
@@ -58,4 +84,4 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
 
 if __name__ == '__main__':
     np.random.seed(0)
-    raise NotImplementedError()
+    fit_and_evaluate_adaboost()
