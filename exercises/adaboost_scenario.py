@@ -38,7 +38,7 @@ def generate_data(n: int, noise_ratio: float) -> Tuple[np.ndarray, np.ndarray]:
     return X, y
 
 
-def fit_and_evaluate_adaboost(noise=0, n_learners=250, train_size=5000,
+def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
                               test_size=500):
     (train_X, train_y), (test_X, test_y) = generate_data(train_size,
                                                          noise), generate_data(
@@ -56,9 +56,9 @@ def fit_and_evaluate_adaboost(noise=0, n_learners=250, train_size=5000,
 
     fig = px.line()
     fig.add_trace(go.Scatter(x=list(range(1, n_learners + 1)), y=test_losses,
-                             mode='markers'))
+                             mode='lines'))
     fig.add_trace(go.Scatter(x=list(range(1, n_learners + 1)), y=train_losses,
-                             mode='markers'))
+                             mode='lines'))
 
     fig.update_layout(
         title=f"Error of AdaBoost using DecisionStump of train and test sets as a function of iteration count",
@@ -84,4 +84,4 @@ def fit_and_evaluate_adaboost(noise=0, n_learners=250, train_size=5000,
 
 if __name__ == '__main__':
     np.random.seed(0)
-    fit_and_evaluate_adaboost()
+    fit_and_evaluate_adaboost(0)
