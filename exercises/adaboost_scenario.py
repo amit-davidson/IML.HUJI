@@ -97,7 +97,27 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
         .update_xaxes(visible=False).update_yaxes(visible=False)
     fig.write_image(f"DecisionSurfaceOfEnsembleOfDifferentIterations.png")
     # Question 3: Decision surface of best performing ensemble
-    raise NotImplementedError()
+    lowest_error_learner = np.argmin(test_losses)
+
+    best_learner_fig = go.Figure()
+    best_learner_fig.add_trace(decision_surface(
+        lambda X: ab.partial_predict(X, lowest_error_learner + 1), lims[0],
+        lims[1], showscale=False))
+    best_learner_fig.add_trace(go.Scatter(x=test_X[:, 0], y=test_X[:, 1],
+                                          mode="markers",
+                                          showlegend=False,
+                                          marker=dict(color=test_y,
+                                                      colorscale=[custom[0],
+                                                                  custom[-1]],
+                                                      line=dict(color="black",
+                                                                width=1))))
+    best_learner_fig.update_layout(
+        title=f"BestLearner - size:{lowest_error_learner + 1} accuracy - {1 - np.round(test_losses[lowest_error_learner], 2)}",
+        title_x=0.5,
+        margin=dict(t=100)) \
+        .update_xaxes(visible=False).update_yaxes(visible=False)
+    best_learner_fig.write_image(
+        f"BestLearner.png")
 
     # Question 4: Decision surface with weighted samples
     raise NotImplementedError()
