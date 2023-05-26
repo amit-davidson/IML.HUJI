@@ -51,8 +51,8 @@ def fit_and_evaluate_adaboost(noise=0, n_learners=250, train_size=5000,
     train_losses = list()
     test_losses = list()
     for i in range(1, n_learners + 1):
-        train_losses.append(ab.partial_predict(train_X, i))
-        test_losses.append(ab.partial_predict(test_X, i))
+        train_losses.append(ab.partial_loss(train_X, train_y, i))
+        test_losses.append(ab.partial_loss(test_X, test_y, i))
 
     fig = px.line()
     fig.add_trace(go.Scatter(x=list(range(1, n_learners + 1)), y=test_losses,

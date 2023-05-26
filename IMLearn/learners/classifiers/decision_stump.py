@@ -76,7 +76,7 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        return np.where(X[:self.j_] >= self.threshold_, self.sign_,
+        return np.where(X[:, self.j_] >= self.threshold_, self.sign_,
                         -self.sign_)
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray,
