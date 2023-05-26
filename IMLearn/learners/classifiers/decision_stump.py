@@ -48,8 +48,9 @@ class DecisionStump(BaseEstimator):
         # We iterate on over all features. We are not sure if values above a
         # certain threshold are good or bad, so we try both labels
         for feature, sign in product(range(n_features), [-1, 1]):
-            error, threshold = self._find_threshold(X[:, feature], y, sign)
+            threshold, error = self._find_threshold(X[:, feature], y, sign)
             if error < min_error:
+                min_error = error
                 self.sign_ = sign
                 self.threshold_ = threshold
                 self.j_ = feature
@@ -79,8 +80,7 @@ class DecisionStump(BaseEstimator):
         return np.where(X[:, self.j_] >= self.threshold_, self.sign_,
                         -self.sign_)
 
-    def _find_threshold(self, values: np.ndarray, labels: np.ndarray,
-                        sign: int) -> Tuple[float, float]:
+    def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
         Given a feature vector and labels, find a threshold by which to perform a split
         The threshold is found according to the value minimizing the misclassification
