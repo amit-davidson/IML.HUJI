@@ -62,14 +62,14 @@ class AdaBoost(BaseEstimator):
 
         for i in range(self.iterations_):
             learner = self.wl_().fit(X, y * self.D_)
-            loss = learner.loss(X, y)
-            error = (loss * self.D_).sum()
+            y_pred = learner.predict(X)
+            error = (self.D_[y != y_pred]).sum()
 
             self.weights_[i] = 0.5 * np.log(1 / error - 1)
             self.models_[i] = learner
 
             # Calculate new weights
-            self.D_ *= np.exp(-y * self.weights_[i] * loss)
+            self.D_ *= np.exp(-y * self.weights_[i] * y_pred)
             self.D_ /= np.sum(self.D_)
 
     def _predict(self, X):
