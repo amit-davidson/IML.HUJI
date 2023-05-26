@@ -112,7 +112,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
                                                       line=dict(color="black",
                                                                 width=1))))
     best_learner_fig.update_layout(
-        title=f"BestLearner - size:{lowest_error_learner + 1} accuracy - {1 - np.round(test_losses[lowest_error_learner], 2)}",
+        title=f"Best Learner - size:{lowest_error_learner + 1} accuracy - {1 - np.round(test_losses[lowest_error_learner], 2)}",
         title_x=0.5,
         margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
@@ -120,7 +120,35 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
         f"BestLearner.png")
 
     # Question 4: Decision surface with weighted samples
-    raise NotImplementedError()
+    D = 20 * ab.D_ / ab.D_.max()
+    fig = go.Figure([
+        decision_surface(ab.predict, lims[0], lims[1], density=60, showscale=False),
+        go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode="markers", showlegend=False,
+                   marker=dict(size=D, color=train_y, symbol=np.where(train_y == 1, "circle", "x")))],
+        layout=go.Layout(width=500, height=500, xaxis=dict(visible=False), yaxis=dict(visible=False),
+                         title=f"Final AdaBoost Sample Distribution"))
+    fig.write_image(f"adaboost_{noise}_weighted_samples.png")
+
+    best_learner_fig = go.Figure()
+    best_learner_fig.add_trace(decision_surface(
+        lambda X: ab.partial_predict(X, n_learners), lims[0],
+        lims[1], showscale=False))
+    best_learner_fig.add_trace(go.Scatter(x=train_X[:, 0], y=train_X[:, 1],
+                                          mode="markers",
+                                          showlegend=False,
+                                          marker=dict(color=train_y,
+                                                      colorscale=[custom[0],
+                                                                  custom[-1]],
+                                                      size=D,
+                                                      line=dict(color="black",
+                                                                width=1))))
+    best_learner_fig.update_layout(
+        title=f"Last Learner",
+        title_x=0.5,
+        margin=dict(t=100)) \
+        .update_xaxes(visible=False).update_yaxes(visible=False)
+    best_learner_fig.write_image(
+        f"LastLearner.png")
 
 
 if __name__ == '__main__':
