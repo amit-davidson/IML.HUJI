@@ -73,8 +73,29 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
     lims = np.array([np.r_[train_X, test_X].min(axis=0),
                      np.r_[train_X, test_X].max(axis=0)]).T + np.array(
         [-.1, .1])
-    raise NotImplementedError()
+    fig = make_subplots(rows=2, cols=2,
+                        subplot_titles=[f"number of learners:{m}" for m in T],
+                        horizontal_spacing=0.01, vertical_spacing=0.07)
+    for i, t in enumerate(T):
+        fig.add_traces([decision_surface(lambda X: ab.partial_predict(X, t),
+                                         lims[0], lims[1], density=60,
+                                         showscale=False),
+                        go.Scatter(x=test_X[:, 0], y=test_X[:, 1],
+                                   mode="markers",
+                                   showlegend=False,
+                                   marker=dict(color=test_y,
+                                               colorscale=[custom[0],
+                                                           custom[-1]],
+                                               line=dict(color="black",
+                                                         width=1)))],
+                       rows=(i // 2) + 1, cols=(i % 2) + 1)
 
+    fig.update_layout(
+        title=f"Decision Surface Of Ensemble Of Different Iterations",
+        title_x=0.5,
+        margin=dict(t=100)) \
+        .update_xaxes(visible=False).update_yaxes(visible=False)
+    fig.write_image(f"DecisionSurfaceOfEnsembleOfDifferentIterations.png")
     # Question 3: Decision surface of best performing ensemble
     raise NotImplementedError()
 
