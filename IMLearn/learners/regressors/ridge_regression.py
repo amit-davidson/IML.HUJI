@@ -66,10 +66,10 @@ class RidgeRegression(BaseEstimator):
         """
         if self.include_intercept_:
             X = np.c_[np.ones(X.shape[0]), X]
-        u, s, vh = np.linalg.svd(X)
+        u, s, vh = np.linalg.svd(X, full_matrices=False)
         diag = np.array([s[i] / (s[i] + self.lam_) for i in range(len(s))])
         sig_ian = np.diag(diag)
-        self.coefs_ = u * sig_ian * vh.T * y
+        self.coefs_ = (u @ sig_ian @ vh).T @ y
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
