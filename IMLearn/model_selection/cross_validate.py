@@ -38,15 +38,28 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
     validation_score: float
         Average validation score over folds
     """
+    idx = np.arange(len(X))
+    folds = np.array_split(idx, cv)
+
     X_folds = np.array_split(X, cv, axis=0)
     y_folds = np.array_split(X, cv, axis=0)
 
     train_score = 0
     validation_score = 0
     for i in range(cv):
-        train_set_X = np.concatenate(X_folds[:i] + X_folds[i + 1:], axis=0)
-        train_set_y = np.concatenate(y_folds[:i] + y_folds[i + 1:], axis=0)
-        estimator.fit(train_set_X, train_set_y)
-        train_score += scoring(train_set_y, estimator.predict(train_set_X))
-        validation_score += scoring(y_folds[i], estimator.predict(X_folds[i]))
+        train_msk = get_mask(i, folds, len(X))
+        train_set_X = X[train_msk]
+        train_set_y = y[train_msk]
+        copied = deepcopy(estimator)
+        copied.fit(train_set_X, train_set_y)
+        train_score += scoring(train_set_y, copied.predict(train_set_X))
+        validation_score += scoring(y[folds[i]], copied.predict(X[folds[i]]))
+
     return train_score / cv, validation_score / cv
+
+def get_mask(idx, folds, size):
+    mask = np.array([True] * size)
+    for i in range(size):
+        if i in folds[idx]:
+            mask[i] = False
+    return mask
