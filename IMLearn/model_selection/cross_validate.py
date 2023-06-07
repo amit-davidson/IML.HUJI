@@ -41,9 +41,6 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
     idx = np.arange(len(X))
     folds = np.array_split(idx, cv)
 
-    X_folds = np.array_split(X, cv, axis=0)
-    y_folds = np.array_split(X, cv, axis=0)
-
     train_score = 0
     validation_score = 0
     for i in range(cv):
@@ -58,7 +55,7 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
     return train_score / cv, validation_score / cv
 
 def get_mask(idx, folds, size):
-    mask = np.array([True] * size)
+    mask = np.full((size,), True)
     for i in range(size):
         if i in folds[idx]:
             mask[i] = False
