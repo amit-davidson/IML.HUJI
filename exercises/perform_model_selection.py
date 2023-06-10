@@ -72,8 +72,8 @@ def select_regularization_parameter(n_samples: int = 50,
     train_scores_l = np.empty(shape=(n_evaluations,))
     validation_scores_l = np.empty(shape=(n_evaluations,))
 
-    ridge_alphas = np.linspace(1e-7, 0.3, num=n_evaluations)
-    lasso_alphas = np.linspace(.001, 2, num=n_evaluations)
+    ridge_alphas = np.linspace(0.005, 1, num=n_evaluations)
+    lasso_alphas = np.linspace(.1, 1.3, num=n_evaluations)
     for i in range(0, n_evaluations):
         train_score_r, validation_score_r = cross_validate(
             RidgeRegression(ridge_alphas[i], True), train_X, train_y,
