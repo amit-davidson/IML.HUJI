@@ -80,7 +80,8 @@ class DecisionStump(BaseEstimator):
         return np.where(X[:, self.j_] >= self.threshold_, self.sign_,
                         -self.sign_)
 
-    def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
+    def _find_threshold(self, values: np.ndarray, labels: np.ndarray,
+                        sign: int) -> Tuple[float, float]:
         """
         Given a feature vector and labels, find a threshold by which to perform a split
         The threshold is found according to the value minimizing the misclassification
@@ -110,28 +111,18 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        error = labels[labels * sign < 0].sum()
-        min_error = error
-        best_i = -1
+        indexes = np.argsort(values)
+        values, labels = values[indexes], labels[indexes]
+        values = np.concatenate([[-np.inf], (values[1:] + values[:-1]) / 2, [np.inf]])
+        pred_signs = np.zeros(values.size)
+        pred_signs.fill(sign)
 
-        for i in range(len(values) + 1):
-            before_label, after_label = labels[:i], labels[i:]
-            before_values, after_values = values[:i], values[i:]
-            error1 = 0
-            error2 = 0
-            if not i == 0:
-                error1 = misclassification_error(before_label, before_values,
-                                                 normalize=True)
-            if not i == len(values):
-                error2 = misclassification_error(after_label, after_values,
-                                                 normalize=True)
-            error = error1 + error2
-
-            if error < min_error:
-                min_error = error
-                best_i = i
-
-        return values[best_i], min_error
+        t_labels = labels[np.sign(labels) == sign]
+        min_err = np.sum(np.abs(t_labels))
+        cumsum = np.cumsum(labels * sign)
+        errs = np.append(min_err, min_err - cumsum)
+        min_loss_index = np.argmin(errs)
+        return values[min_loss_index], errs[min_loss_index]
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
