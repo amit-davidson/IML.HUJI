@@ -116,7 +116,18 @@ def select_regularization_parameter(n_samples: int = 50,
     fig.write_image(f"CrossValidationModelSelection.png")
 
     # Question 3 - Compare best Ridge model, best Lasso model and Least Squares model
-    raise NotImplementedError()
+    best_r_i = np.argmin(validation_scores_r)
+    print("best_ridge: ", ridge_alphas[best_r_i])
+    best_l_i = np.argmin(validation_scores_l)
+    print("best_ridge: ", lasso_alphas[best_l_i])
+
+    print(f"Least Squares: ",
+          LinearRegression().fit(train_X, train_y).loss(test_X, test_y))
+    print(f"Ridge: ", RidgeRegression(lam=ridge_alphas[best_r_i]).fit(train_X,
+                                                                      train_y).loss(
+        test_X, test_y))
+    print(f"Lasso: ", mean_square_error(test_y, Lasso(
+        alpha=lasso_alphas[best_l_i]).fit(train_X, train_y).predict(test_X)))
 
 
 if __name__ == '__main__':
