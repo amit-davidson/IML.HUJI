@@ -119,7 +119,7 @@ def select_regularization_parameter(n_samples: int = 50,
     best_r_i = np.argmin(validation_scores_r)
     print("best_ridge: ", ridge_alphas[best_r_i])
     best_l_i = np.argmin(validation_scores_l)
-    print("best_ridge: ", lasso_alphas[best_l_i])
+    print("best_lasso: ", lasso_alphas[best_l_i])
 
     print(f"Least Squares: ",
           LinearRegression().fit(train_X, train_y).loss(test_X, test_y))
