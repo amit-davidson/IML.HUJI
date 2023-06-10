@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import random
+
 import numpy as np
 import pandas as pd
 from sklearn import datasets
@@ -51,11 +54,17 @@ def select_regularization_parameter(n_samples: int = 50,
     n_evaluations: int, default = 500
         Number of regularization parameter values to evaluate for each of the algorithms
     """
+
     cv: int = 5
     # Question 1 - Load diabetes dataset and split into training and testing portions
     X, y = datasets.load_diabetes(return_X_y=True)
-    train_X, train_y, test_X, test_y = X[:n_samples], y[:n_samples], \
-                                       X[n_samples:], y[n_samples:]
+
+    idx = np.arange(len(X))
+    chosen_idx = np.random.choice(idx, n_samples)
+    mask = np.zeros(len(X), dtype=bool)
+    mask[chosen_idx] = True
+
+    train_X, train_y, test_X, test_y = X[mask], y[mask], X[~mask], y[~mask]
 
     # Question 2 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
     train_scores_r = np.empty(shape=(n_evaluations,))
@@ -63,13 +72,15 @@ def select_regularization_parameter(n_samples: int = 50,
     train_scores_l = np.empty(shape=(n_evaluations,))
     validation_scores_l = np.empty(shape=(n_evaluations,))
 
-    ridge_alphas = np.linspace(1e-5, 5 * 1e-2, num=n_evaluations)
+    ridge_alphas = np.linspace(1e-7, 0.3, num=n_evaluations)
     lasso_alphas = np.linspace(.001, 2, num=n_evaluations)
     for i in range(0, n_evaluations):
         train_score_r, validation_score_r = cross_validate(
-            RidgeRegression(ridge_alphas[i], True), train_X, train_y, mean_square_error, cv)
+            RidgeRegression(ridge_alphas[i], True), train_X, train_y,
+            mean_square_error, cv)
         train_score_l, validation_score_l = cross_validate(
-            Lasso(alpha=lasso_alphas[i]), train_X, train_y, mean_square_error, cv)
+            Lasso(alpha=lasso_alphas[i]), train_X, train_y, mean_square_error,
+            cv)
 
         train_scores_r[i] = train_score_r
         validation_scores_r[i] = validation_score_r
@@ -78,7 +89,9 @@ def select_regularization_parameter(n_samples: int = 50,
 
     fig = make_subplots(rows=1, cols=2,
                         subplot_titles=[f"Ridge", "Lasso"],
-                        horizontal_spacing=0.01, vertical_spacing=0.07)
+                        horizontal_spacing=0.1, vertical_spacing=0.07,
+                        shared_xaxes=True) \
+        .update_xaxes(title="Regularization parameter")
 
     fig.add_trace(go.Scatter(x=ridge_alphas, y=train_scores_r,
                              mode='lines', name="Train Error Ridge"), row=1,
@@ -96,8 +109,7 @@ def select_regularization_parameter(n_samples: int = 50,
 
     fig.update_layout(
         title=f"Train and Validation Errors of Lasso and Ridge as a function "
-              f"of lambda",
-        xaxis_title="Lambda",
+              f"of the Regularization parameter",
         yaxis_title="Error",
         title_x=0.5,
     )

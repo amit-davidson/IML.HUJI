@@ -70,7 +70,7 @@ class RidgeRegression(BaseEstimator):
         diag = np.array(
             [s[i] / (s[i] ** 2 + self.lam_) for i in range(len(s))])
         sig_ian = np.diag(diag)
-        self.coefs_ = (u @ sig_ian @ vh).T @ y
+        self.coefs_ = vh.T @ sig_ian @ u.T @ y
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
