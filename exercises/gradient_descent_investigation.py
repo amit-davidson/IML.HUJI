@@ -73,12 +73,23 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
     weights: List[np.ndarray]
         Recorded parameters
     """
-    raise NotImplementedError()
+    weightss, vals = list(), list()
+    def cb(solver: GradientDescent, weights: np.ndarray, val: np.ndarray, grad: np.ndarray, t: int, eta: float, delta: float):
+        weightss.append(weights)
+        vals.append(val)
+
+    return cb, vals, weightss
 
 
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
-    raise NotImplementedError()
+    for m in [L1, L2]:
+        for eta in etas:
+            callback, vals, w = get_gd_state_recorder_callback()
+            gd = GradientDescent(learning_rate=FixedLR(eta), callback=callback)
+            gd.fit(m(weights=init), np.array([]), np.array([]))
+            fig = plot_descent_path(m, np.array(w), title=f"{m.__name__} Module eta={eta}")
+            fig.write_image(f"{m.__name__}_{eta}.png")
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
