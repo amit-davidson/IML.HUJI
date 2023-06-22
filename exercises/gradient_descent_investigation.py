@@ -100,6 +100,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
                 title_x=0.5,
             )
             fig.write_image(f"convergence_rate_{m.__name__}_{eta}.png")
+            print(f"{m.__name__}: {format(min(vals), '.10f')}")
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
