@@ -9,6 +9,7 @@ from IMLearn.learners.classifiers.logistic_regression import LogisticRegression
 from IMLearn.utils import split_train_test
 
 import plotly.graph_objects as go
+import plotly.express as px
 
 
 def plot_descent_path(module: Type[BaseModule],
@@ -88,8 +89,17 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
             callback, vals, w = get_gd_state_recorder_callback()
             gd = GradientDescent(learning_rate=FixedLR(eta), callback=callback)
             gd.fit(m(weights=init), np.array([]), np.array([]))
-            fig = plot_descent_path(m, np.array(w), title=f"{m.__name__} Module eta={eta}")
-            fig.write_image(f"{m.__name__}_{eta}.png")
+            fig = plot_descent_path(m, np.array(w), title=f"Descent path of {m.__name__} Module eta={eta}")
+            fig.write_image(f"descent_path_{m.__name__}_{eta}.png")
+
+            fig = px.scatter(x=list(range(len(vals))), y=vals)
+            fig.update_layout(
+                title=f"convergence rate {m.__name__} Module eta={eta}",
+                xaxis_title="Iteration",
+                yaxis_title="Error",
+                title_x=0.5,
+            )
+            fig.write_image(f"convergence_rate_{m.__name__}_{eta}.png")
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
