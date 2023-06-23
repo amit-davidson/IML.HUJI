@@ -121,8 +121,8 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        weights = np.zeros(shape=(self.max_iter_, f.weights.shape[0]))
-        vals = np.zeros(shape=(self.max_iter_, f.weights.shape[0]))
+        weights = [f.compute_output(X=X, y=y)]
+        vals = [f.weights]
         delta = np.inf
         vals[0] = f.compute_output(X=X, y=y)
         weights[0] = f.weights_
@@ -139,13 +139,14 @@ class GradientDescent:
             delta = np.linalg.norm(f.weights - old, ord=2)
             self.callback_(solver=self, weights=f.weights, val=f.compute_output(X=X, y=y), grad=grad, t=i, eta=eta, delta=delta)
 
-            weights[i] = f.weights
-            vals[i] = val
+            weights.append(f.weights)
+            vals.append(val)
             i += 1
 
+        weights = np.array(X)
         if self.out_type_ == 'last':
-            return weights[:i][-1]
+            return weights[-1]
         if self.out_type_ == 'best':
             return weights[np.argmin(vals)]
         if self.out_type_ == 'average':
-            return np.mean(weights[:i])
+            return np.mean(weights)

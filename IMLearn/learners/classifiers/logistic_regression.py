@@ -138,8 +138,7 @@ class LogisticRegression(BaseEstimator):
         if self.include_intercept_:
             X = np.c_[np.ones(X.shape[0]), X]
 
-        mul = X @ self.coefs_
-        return np.exp(mul) / (np.exp(mul) + 1)
+        return 1 - 1/(np.exp(X @ self.coefs_) + 1)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
