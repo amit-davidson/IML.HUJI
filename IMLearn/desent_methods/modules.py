@@ -236,7 +236,7 @@ class RegularizedModule(BaseModule):
         """
         if self.include_intercept_:
             regularization = self.regularization_module_.compute_jacobian(**kwargs)
-            regularization = np.c_[np.ones(regularization.shape[0]), regularization]
+            regularization = np.insert(regularization, 0, 0)
         else:
             regularization = self.regularization_module_.compute_jacobian(**kwargs)
         return self.fidelity_module_.compute_jacobian(**kwargs) + self.lam_ * regularization
