@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from typing import Tuple, List, Callable, Type
 
+from IMLearn.metrics import misclassification_error
+from IMLearn.model_selection import cross_validate
 from utils import custom
 from sklearn.metrics import roc_curve, auc
 
@@ -157,7 +159,10 @@ def fit_logistic_regression():
     X_train, y_train, X_test, y_test = np.array(X_train), np.array(y_train),\
                                        np.array(X_test), np.array(y_test)
 
-    lr = LogisticRegression(include_intercept=False)
+    callback, _, _ = get_gd_state_recorder_callback()
+    gd = GradientDescent(callback=callback, learning_rate=FixedLR(1e-4), max_iter=20000)
+
+    lr = LogisticRegression(solver=gd)
     lr.fit(X_train, y_train)
     y_prob = lr.predict_proba(X_test)
     fpr, tpr, thresholds = roc_curve(y_test, y_prob)
@@ -179,12 +184,32 @@ def fit_logistic_regression():
 
     best_alpha = thresholds[np.argmax(tpr - fpr)]
     print("Best alpha:", best_alpha)
-    lr_best_alpha = LogisticRegression(alpha=best_alpha)
+    lr_best_alpha = LogisticRegression(solver=gd, alpha=best_alpha)
     lr_best_alpha.fit(X_train, y_train)
     print("Loss is: ", lr_best_alpha.loss(X_test, y_test))
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
+    train_errors = list()
+    validation_errors = list()
+    lams = (0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
+    for module in ("l1", "l2"):
+        for lam in lams:
+            lr_reg = LogisticRegression(solver=gd, alpha=0.5, penalty=module,
+                                       lam=lam)
+            train_err, validation_err = cross_validate(
+                lr_reg, X_train, y_train,
+                misclassification_error, 5)
+            train_errors.append(train_err)
+            validation_errors.append(validation_err)
+
+        best_lam = lams[int(np.argmin(validation_errors))]
+        lr = LogisticRegression(solver=gd, penalty=module, alpha=0.5,
+                                lam=best_lam)
+        lr.fit(X_train, y_train)
+        print(f"{module}:")
+        print(f"Best lambda:{best_lam}")
+        print(f"Error: {lr.loss(X_test, y_test)}")
 
 
 if __name__ == '__main__':
