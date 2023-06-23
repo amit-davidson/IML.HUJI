@@ -183,12 +183,8 @@ def fit_logistic_regression():
     lr_best_alpha.fit(X_train, y_train)
     print("Loss is: ", lr_best_alpha.loss(X_test, y_test))
 
-    # Plotting convergence rate of logistic regression over SA heart disease data
-    raise NotImplementedError()
-
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    raise NotImplementedError()
 
 
 if __name__ == '__main__':

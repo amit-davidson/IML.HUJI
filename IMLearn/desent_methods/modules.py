@@ -159,8 +159,7 @@ class LogisticModule(BaseModule):
             Derivative of function with respect to self.weights at point self.weights
         """
         X_w = X @ self.weights
-        return (-1 / X.shape[0]) * ((y - np.exp(X_w)) / (1 + np.exp(X_w)) @ X)
-
+        return (-1 / X.shape[0]) * ((y - np.exp(X_w) / (np.exp(X_w) + 1)) @ X)
 
 class RegularizedModule(BaseModule):
     """
