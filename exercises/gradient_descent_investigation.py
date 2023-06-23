@@ -154,7 +154,7 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 def fit_logistic_regression():
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
-    lr = LogisticRegression()
+    lr = LogisticRegression(include_intercept=False)
     lr.fit(X_train, y_train)
     y_prob = lr.predict_proba(X_test)
     fpr, tpr, thresholds = roc_curve(y_test, y_prob)
