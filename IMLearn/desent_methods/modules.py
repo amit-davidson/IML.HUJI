@@ -138,7 +138,8 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        return (-1 / X.shape[0]) * np.sum(y * (X @ self.weights_) - np.log(1+np.exp(X @ self.weights_)))
+        return (-1 / X.shape[0]) * np.sum(y * (X @ self.weights_) -
+                                          np.log(1+np.exp(X @ self.weights_)))
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray,
                          **kwargs) -> np.ndarray:
@@ -216,7 +217,8 @@ class RegularizedModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        return self.fidelity_module_.compute_output(**kwargs) + self.lam_ * self.regularization_module_.compute_output(**kwargs)
+        return self.fidelity_module_.compute_output(**kwargs) + self.lam_\
+               * self.regularization_module_.compute_output(**kwargs)
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -264,9 +266,9 @@ class RegularizedModule(BaseModule):
             Weights to set for module
         """
         if self.include_intercept_:
-            self.regularization_module_ = weights[1:]
+            self.regularization_module_.weights = weights[1:]
         else:
-            self.regularization_module_ = weights
+            self.regularization_module_.weights = weights
 
         self.fidelity_module_.weights_ = weights
         self.weights_ = weights
