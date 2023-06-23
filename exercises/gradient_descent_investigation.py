@@ -154,6 +154,9 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 def fit_logistic_regression():
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
+    X_train, y_train, X_test, y_test = np.array(X_train), np.array(y_train),\
+                                       np.array(X_test), np.array(y_test)
+
     lr = LogisticRegression(include_intercept=False)
     lr.fit(X_train, y_train)
     y_prob = lr.predict_proba(X_test)
@@ -172,7 +175,14 @@ def fit_logistic_regression():
             title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}={auc(fpr, tpr):.6f}$",
             xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
             yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
-    fig.write_image("a.png")
+    fig.write_image("ROC_model.png")
+
+    best_alpha = thresholds[np.argmax(tpr - fpr)]
+    print("Best alpha:", best_alpha)
+    lr_best_alpha = LogisticRegression(alpha=best_alpha)
+    lr_best_alpha.fit(X_train, y_train)
+    print("Loss is: ", lr_best_alpha.loss(X_test, y_test))
+
     # Plotting convergence rate of logistic regression over SA heart disease data
     raise NotImplementedError()
 
