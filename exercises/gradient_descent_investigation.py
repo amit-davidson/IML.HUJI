@@ -115,8 +115,6 @@ def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.
     raise NotImplementedError()
 
     # Plot algorithm's convergence for the different values of gamma
-    raise NotImplementedError()
-
     # Plot descent path for gamma=0.95
     raise NotImplementedError()
 
@@ -182,11 +180,11 @@ def fit_logistic_regression():
             yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
     fig.write_image("ROC_model.png")
 
-    best_alpha = thresholds[np.argmax(tpr - fpr)]
+    best_alpha = np.round(thresholds[np.argmax(tpr - fpr)], decimals=2)
     print("Best alpha:", best_alpha)
     lr_best_alpha = LogisticRegression(solver=gd, alpha=best_alpha)
     lr_best_alpha.fit(X_train, y_train)
-    print("Loss is: ", lr_best_alpha.loss(X_test, y_test))
+    print("Loss: ", np.round(lr_best_alpha.loss(X_test, y_test), decimals=2))
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
@@ -200,7 +198,6 @@ def fit_logistic_regression():
             train_err, validation_err = cross_validate(
                 lr_reg, X_train, y_train,
                 misclassification_error, 5)
-            train_errors.append(train_err)
             validation_errors.append(validation_err)
 
         best_lam = lams[int(np.argmin(validation_errors))]
@@ -209,7 +206,7 @@ def fit_logistic_regression():
         lr.fit(X_train, y_train)
         print(f"{module}:")
         print(f"Best lambda:{best_lam}")
-        print(f"Error: {lr.loss(X_test, y_test)}")
+        print(f"Error: {np.round(lr.loss(X_test, y_test), decimals=2)}")
 
 
 if __name__ == '__main__':

@@ -91,7 +91,8 @@ class LogisticRegression(BaseEstimator):
         """
         if self.include_intercept_:
             X = np.c_[np.ones(X.shape[0]), X]
-        weights = np.random.normal(0, 1/X.shape[1], X.shape[1])
+
+        weights = np.random.randn(X.shape[1]) / np.sqrt(X.shape[1])
 
         logistic_module = LogisticModule(weights)
         if self.penalty_ == "none":
