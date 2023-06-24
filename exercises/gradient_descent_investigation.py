@@ -188,15 +188,13 @@ def fit_logistic_regression():
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    train_errors = list()
-    validation_errors = list()
     lams = (0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
     for module in ("l1", "l2"):
+        validation_errors = list()
         for lam in lams:
             lr_reg = LogisticRegression(solver=gd, alpha=0.5, penalty=module,
                                        lam=lam)
-            train_err, validation_err = cross_validate(
-                lr_reg, X_train, y_train,
+            _, validation_err = cross_validate(lr_reg, X_train, y_train,
                 misclassification_error, 5)
             validation_errors.append(validation_err)
 
